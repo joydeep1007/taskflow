@@ -37,9 +37,14 @@ async def value_error_handler(request: Request, exc: ValueError):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    for error in errors:
+        if "ctx" in error and "error" in error["ctx"]:
+            error["ctx"]["error"] = str(error["ctx"]["error"])
+        
     return JSONResponse(
         status_code=400,
-        content={"error": "Validation failed", "detail": exc.errors()},
+        content={"error": "Validation failed", "detail":errors}
     )
 
 @app.exception_handler(Exception)
