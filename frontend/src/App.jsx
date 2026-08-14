@@ -24,6 +24,22 @@ export default function App() {
         fetchBoard();
     }, []);
 
+    const handleTaskCreate = (columnId) => {
+        console.log("Create task in column", columnId);
+    };
+
+    const handleTaskEdit = (task) => {
+        console.log("Edit task", task);
+    };
+
+    const handleTaskDelete = (taskId) => {
+        console.log("Delete task", taskId);
+    };
+
+    const handleTaskMove = (taskId, moveData) => {
+        console.log("Move task", taskId, moveData);
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -44,7 +60,15 @@ export default function App() {
 
     return (
         <div>
-            {board && <Board board={board} />}
+            {board && (
+                <Board 
+                    board={board} 
+                    onTaskCreate={handleTaskCreate}
+                    onTaskEdit={handleTaskEdit}
+                    onTaskDelete={handleTaskDelete}
+                    onTaskMove={handleTaskMove}
+                />
+            )}
         </div>
     );
 }
