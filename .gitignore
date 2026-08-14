@@ -26,3 +26,8 @@ AGENTS.md
 .env
 .venv/
 .env.local
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
