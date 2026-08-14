@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { getBoard } from './api/client';
+import { getBoard, deleteTask } from './api/client';
 import Board from './components/Board';
+import TaskModal from './components/TaskModal';
 
 export default function App() {
     const [board, setBoard] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [modal, setModal] = useState({ open: false, mode: 'create', task: null, columnId: null });
 
     const fetchBoard = async () => {
         setLoading(true);
@@ -25,19 +27,32 @@ export default function App() {
     }, []);
 
     const handleTaskCreate = (columnId) => {
-        console.log("Create task in column", columnId);
+        setModal({ open: true, mode: 'create', task: null, columnId });
     };
 
     const handleTaskEdit = (task) => {
-        console.log("Edit task", task);
+        setModal({ open: true, mode: 'edit', task, columnId: null });
     };
 
-    const handleTaskDelete = (taskId) => {
-        console.log("Delete task", taskId);
+    const handleTaskDelete = async (taskId) => {
+        try {
+            await deleteTask(taskId);
+            await fetchBoard();
+        } catch (err) {
+            alert(err.message);
+        }
     };
 
     const handleTaskMove = (taskId, moveData) => {
         console.log("Move task", taskId, moveData);
+    };
+
+    const handleModalSave = () => {
+        fetchBoard();
+    };
+
+    const handleModalClose = () => {
+        setModal({ ...modal, open: false });
     };
 
     if (loading) {
@@ -67,6 +82,15 @@ export default function App() {
                     onTaskEdit={handleTaskEdit}
                     onTaskDelete={handleTaskDelete}
                     onTaskMove={handleTaskMove}
+                />
+            )}
+            {modal.open && (
+                <TaskModal
+                    mode={modal.mode}
+                    task={modal.task}
+                    columnId={modal.columnId}
+                    onClose={handleModalClose}
+                    onSave={handleModalSave}
                 />
             )}
         </div>
