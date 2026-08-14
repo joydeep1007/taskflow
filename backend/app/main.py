@@ -29,14 +29,14 @@ app.add_middleware(
 )
 
 @app.exception_handler(ValueError)
-async def value_error_handler(request: Request, exc: ValueError):
+async def value_error_handler(_request: Request, exc: ValueError):
     return JSONResponse(
         status_code=400,
         content={"error": str(exc)},
     )
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(_request: Request, exc: RequestValidationError):
     errors = exc.errors()
     for error in errors:
         if "ctx" in error and "error" in error["ctx"]:
@@ -48,7 +48,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 @app.exception_handler(Exception)
-async def generic_exception_handler(request: Request, exc: Exception):
+async def generic_exception_handler(_request: Request, _exc: Exception):
     return JSONResponse(
         status_code=500,
         content={"error": "Something went wrong"},
