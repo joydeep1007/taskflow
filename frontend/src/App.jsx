@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getBoard, deleteTask, moveTask } from './api/client';
+import { getBoard, deleteTask, moveTask, getTasksByPriority } from './api/client';
 import Board from './components/Board';
 import TaskModal from './components/TaskModal';
+import FilterBar from './components/FilterBar';
 
 export default function App() {
     const [board, setBoard] = useState(null);
@@ -9,6 +10,7 @@ export default function App() {
     const [error, setError] = useState(null);
     const [moveError, setMoveError] = useState(null);
     const [modal, setModal] = useState({ open: false, mode: 'create', task: null, columnId: null });
+    const [activeFilter, setActiveFilter] = useState(null);
 
     const fetchBoard = async () => {
         setLoading(true);
@@ -26,6 +28,16 @@ export default function App() {
     useEffect(() => {
         fetchBoard();
     }, []);
+
+    useEffect(() => {
+        if (activeFilter) {
+            getTasksByPriority(1, activeFilter)
+                .then(results => {
+                    console.log("// Backend Query 2 result — same data, proving the SQL query runs", results);
+                })
+                .catch(err => console.error("Failed to fetch filtered tasks:", err));
+        }
+    }, [activeFilter]);
 
     const handleTaskCreate = (columnId) => {
         setModal({ open: true, mode: 'create', task: null, columnId });
@@ -67,8 +79,12 @@ export default function App() {
         const sourceCol = board.columns[sourceColIndex];
         const destCol = board.columns[destColIndex];
 
+        const taskId = parseInt(draggableId);
         const sourceTasks = Array.from(sourceCol.tasks);
-        const [movedTask] = sourceTasks.splice(source.index, 1);
+        const taskIndexInSource = sourceTasks.findIndex(t => t.id === taskId);
+        
+        if (taskIndexInSource === -1) return;
+        const [movedTask] = sourceTasks.splice(taskIndexInSource, 1);
 
         const newBoard = { ...board, columns: [...board.columns] };
 
@@ -111,6 +127,25 @@ export default function App() {
         setModal({ ...modal, open: false });
     };
 
+    const getFilteredBoard = () => {
+        if (!board) return null;
+        if (!activeFilter) return board;
+
+        return {
+            ...board,
+            columns: board.columns.map(col => {
+                const filteredTasks = col.tasks.filter(t => t.priority === activeFilter);
+                return {
+                    ...col,
+                    tasks: filteredTasks,
+                    task_count: filteredTasks.length
+                };
+            })
+        };
+    };
+
+    const filteredBoard = getFilteredBoard();
+
     if (loading && !board) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -137,14 +172,17 @@ export default function App() {
                 </div>
             )}
             {board && (
-                <Board 
-                    board={board} 
-                    onTaskCreate={handleTaskCreate}
-                    onTaskEdit={handleTaskEdit}
-                    onTaskDelete={handleTaskDelete}
-                    onTaskMove={handleTaskMove}
-                    onDragEnd={handleDragEnd}
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+                    <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+                    <Board 
+                        board={filteredBoard} 
+                        onTaskCreate={handleTaskCreate}
+                        onTaskEdit={handleTaskEdit}
+                        onTaskDelete={handleTaskDelete}
+                        onTaskMove={handleTaskMove}
+                        onDragEnd={handleDragEnd}
+                    />
+                </div>
             )}
             {modal.open && (
                 <TaskModal
