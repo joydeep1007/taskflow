@@ -1,4 +1,6 @@
 import os
+# pyrefly: ignore [missing-import]
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 # pyrefly: ignore [missing-import]
 from fastapi import FastAPI, Request
@@ -10,6 +12,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import init_db
 from app.routers import boards, tasks
+
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
