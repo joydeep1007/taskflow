@@ -1,6 +1,10 @@
 import os
 # pyrefly: ignore [missing-import]
+from dotenv import load_dotenv
+# pyrefly: ignore [missing-import]
 import aiosqlite
+
+load_dotenv()
 
 DB_PATH = os.environ.get("DB_PATH", "./taskflow.db")
 
