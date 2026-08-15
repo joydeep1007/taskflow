@@ -1,5 +1,6 @@
 import React from 'react';
 import TaskCard from './TaskCard';
+import { Droppable } from '@hello-pangea/dnd';
 
 export default function Column({ column, allColumns, onTaskCreate, onTaskEdit, onTaskDelete, onTaskMove }) {
     return (
@@ -20,18 +21,27 @@ export default function Column({ column, allColumns, onTaskCreate, onTaskEdit, o
                 </span>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {column.tasks && column.tasks.map(task => (
-                    <TaskCard
-                        key={task.id}
-                        task={task}
-                        allColumns={allColumns}
-                        onEdit={onTaskEdit}
-                        onDelete={onTaskDelete}
-                        onMove={onTaskMove}
-                    />
-                ))}
-            </div>
+            <Droppable droppableId={String(column.id)}>
+                {(provided, snapshot) => (
+                    <div 
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '8px', minHeight: '50px' }}
+                    >
+                        {column.tasks && column.tasks.map(task => (
+                            <TaskCard
+                                key={task.id}
+                                task={task}
+                                allColumns={allColumns}
+                                onEdit={onTaskEdit}
+                                onDelete={onTaskDelete}
+                                onMove={onTaskMove}
+                            />
+                        ))}
+                        {provided.placeholder}
+                    </div>
+                )}
+            </Droppable>
 
             <button 
                 onClick={() => onTaskCreate(column.id)}
