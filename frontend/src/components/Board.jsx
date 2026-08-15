@@ -2,7 +2,7 @@ import React from 'react';
 import Column from './Column';
 import { DragDropContext } from '@hello-pangea/dnd';
 
-export default function Board({ board, onTaskCreate, onTaskEdit, onTaskDelete, onTaskMove, onDragEnd }) {
+export default function Board({ board, deleteError, onTaskCreate, onTaskEdit, onTaskDelete, onTaskMove, onDragEnd }) {
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <div style={{ 
@@ -19,6 +19,7 @@ export default function Board({ board, onTaskCreate, onTaskEdit, onTaskDelete, o
                         key={column.id}
                         column={column}
                         allColumns={board.columns}
+                        deleteError={deleteError?.columnId === column.id ? deleteError.message : null}
                         onTaskCreate={onTaskCreate}
                         onTaskEdit={onTaskEdit}
                         onTaskDelete={onTaskDelete}

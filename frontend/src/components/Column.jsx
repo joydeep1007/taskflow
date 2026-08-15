@@ -2,7 +2,7 @@ import React from 'react';
 import TaskCard from './TaskCard';
 import { Droppable } from '@hello-pangea/dnd';
 
-export default function Column({ column, allColumns, onTaskCreate, onTaskEdit, onTaskDelete, onTaskMove }) {
+export default function Column({ column, allColumns, deleteError, onTaskCreate, onTaskEdit, onTaskDelete, onTaskMove }) {
     return (
         <div style={{
             background: '#f4f5f7',
@@ -20,6 +20,12 @@ export default function Column({ column, allColumns, onTaskCreate, onTaskEdit, o
                     {column.task_count}
                 </span>
             </div>
+
+            {deleteError && (
+                <div style={{ background: '#ffebe6', color: '#bf2600', padding: '8px', borderRadius: '4px', fontSize: '0.85em', textAlign: 'center', fontWeight: 'bold' }}>
+                    {deleteError}
+                </div>
+            )}
             
             <Droppable droppableId={String(column.id)}>
                 {(provided, snapshot) => (
@@ -28,16 +34,22 @@ export default function Column({ column, allColumns, onTaskCreate, onTaskEdit, o
                         ref={provided.innerRef}
                         style={{ display: 'flex', flexDirection: 'column', gap: '8px', minHeight: '50px' }}
                     >
-                        {column.tasks && column.tasks.map(task => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                allColumns={allColumns}
-                                onEdit={onTaskEdit}
-                                onDelete={onTaskDelete}
-                                onMove={onTaskMove}
-                            />
-                        ))}
+                        {(!column.tasks || column.tasks.length === 0) ? (
+                            <div style={{ color: '#888', fontStyle: 'italic', padding: '10px', textAlign: 'center' }}>
+                                No tasks here
+                            </div>
+                        ) : (
+                            column.tasks.map(task => (
+                                <TaskCard
+                                    key={task.id}
+                                    task={task}
+                                    allColumns={allColumns}
+                                    onEdit={onTaskEdit}
+                                    onDelete={onTaskDelete}
+                                    onMove={onTaskMove}
+                                />
+                            ))
+                        )}
                         {provided.placeholder}
                     </div>
                 )}

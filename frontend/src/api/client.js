@@ -10,7 +10,10 @@ async function fetchWithHandling(url, options = {}) {
     try {
         response = await fetch(url, options);
     } catch (error) {
-        throw new Error("Network error — is the backend running?");
+        if (error.message === "Failed to fetch" || error.message.includes("fetch")) {
+            throw new Error("Cannot reach the server — check your connection.");
+        }
+        throw new Error(error.message || "Cannot reach the server — check your connection.");
     }
 
     if (!response.ok) {

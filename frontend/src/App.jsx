@@ -9,6 +9,7 @@ export default function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [moveError, setMoveError] = useState(null);
+    const [deleteError, setDeleteError] = useState(null);
     const [modal, setModal] = useState({ open: false, mode: 'create', task: null, columnId: null });
     const [activeFilter, setActiveFilter] = useState(null);
 
@@ -52,7 +53,13 @@ export default function App() {
             await deleteTask(taskId);
             await fetchBoard();
         } catch (err) {
-            alert(err.message);
+            const taskCol = board?.columns.find(c => c.tasks.some(t => t.id === taskId));
+            if (taskCol) {
+                setDeleteError({ columnId: taskCol.id, message: "Failed to delete task — please try again" });
+                setTimeout(() => setDeleteError(null), 5000);
+            } else {
+                alert("Failed to delete task — please try again");
+            }
         }
     };
 
@@ -149,7 +156,7 @@ export default function App() {
     if (loading && !board) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <p>Loading board...</p>
+                <p>⌛ Loading...</p>
             </div>
         );
     }
@@ -157,9 +164,9 @@ export default function App() {
     if (error && !board) {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px', textAlign: 'center' }}>
-                <h2>Error</h2>
-                <p style={{ color: 'red' }}>{error}</p>
-                <button onClick={fetchBoard} style={{ padding: '10px 20px', marginTop: '10px', cursor: 'pointer' }}>Retry</button>
+                <h2 style={{ fontSize: '2rem', marginBottom: '10px' }}>⚠ Error Loading Board</h2>
+                <p style={{ color: 'red', fontSize: '1.2rem', marginBottom: '20px' }}>{error}</p>
+                <button onClick={() => fetchBoard()} style={{ padding: '10px 20px', fontSize: '1rem', background: '#0052cc', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Retry</button>
             </div>
         );
     }
@@ -176,6 +183,7 @@ export default function App() {
                     <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
                     <Board 
                         board={filteredBoard} 
+                        deleteError={deleteError}
                         onTaskCreate={handleTaskCreate}
                         onTaskEdit={handleTaskEdit}
                         onTaskDelete={handleTaskDelete}
